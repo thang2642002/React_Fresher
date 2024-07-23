@@ -3,6 +3,8 @@ import Button from "react-bootstrap/Button";
 import ReactPaginate from "react-paginate";
 import _, { debounce } from "lodash";
 import { CSVLink, CSVDownload } from "react-csv";
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
 import ModalAddNewUser from "../Components/ModalAddNewUser";
 import { toast } from "react-toastify";
 import { getListUser, deleteUser } from "../Services/UserService";
@@ -23,6 +25,13 @@ const TableUser = () => {
   const [sortBy, setSortBy] = useState("asc");
   const [sortField, setSortField] = useState("id");
   const [seachEmail, setSeachEmail] = useState("");
+  const [dataExport, setDataExport] = useState([]);
+  const [customHeaders, setCustomHeaders] = useState([
+    { label: "ID", key: "id" },
+    { label: "Email", key: "email" },
+    { label: "First Name", key: "first_name" },
+    { label: "Last Name", key: "last_name" },
+  ]);
 
   const ListUser = async (page) => {
     const res = await getListUser(page);
@@ -95,6 +104,101 @@ const TableUser = () => {
     }
   };
 
+  // const getUsersExport = (event, done) => {
+  //   let result = [];
+  //   if (listUser && listUser.length > 0) {
+  //     result.push(["Id", "Email", "Frist Name", "Last Name"]);
+  //     listUser.map((item, index) => {
+  //       let arr = [];
+  //       arr[0] = item.id;
+  //       arr[1] = item.email;
+  //       arr[2] = item.first_name;
+  //       arr[3] = item.last_name;
+  //       result.push(arr);
+  //     });
+  //     setDataExport(result);
+  //     done();
+  //   }
+  // };
+
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(
+      listUser.map((user) => {
+        let row = {};
+        customHeaders.forEach((header) => {
+          row[header.label] = user[header.key];
+        });
+        return row;
+      })
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Users");
+    XLSX.writeFile(wb, "UsersData.xlsx");
+  };
+
+  // const handleImport = (e) => {
+  //   if (e.target && e.target.files && e.target.files[0]) {
+  //     let file = e.target.files[0];
+  //     if (
+  //       file.type !==
+  //         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+  //       file.type !== "text/csv"
+  //     ) {
+  //       toast.error("file format error");
+  //     } else {
+  //       Papa.parse(file, {
+  //         header: true,
+  //         complete: function (results) {
+  //           console.log("Finished:", results.data);
+  //         },
+  //       });
+  //     }
+  //   }
+  // };
+
+  const handleImport = (e) => {
+    if (e.target && e.target.files && e.target.files[0]) {
+      let file = e.target.files[0];
+      const fileExtension = file.name.split(".").pop().toLowerCase();
+
+      if (fileExtension === "xlsx") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (json && json.length > 0) {
+            const headers = json[0];
+            const validHeaders = customHeaders.map((header) => header.label);
+            const isValid = headers.every((header) =>
+              validHeaders.includes(header)
+            );
+
+            if (isValid) {
+              const formattedData = json.slice(1).map((row) => {
+                let formattedRow = {};
+                row.forEach((cell, index) => {
+                  formattedRow[customHeaders[index].key] = cell;
+                });
+                return formattedRow;
+              });
+              setListUser(formattedData);
+              toast.success("Import successful");
+            } else {
+              toast.error("File headers do not match the required format");
+            }
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        toast.error("Unsupported file format. Please upload an XLSX file.");
+      }
+    }
+  };
+
   useEffect(() => {
     ListUser(1);
   }, []);
@@ -113,17 +217,28 @@ const TableUser = () => {
           <label htmlFor="import" className="btn btn-warning text-light">
             <i class="fa-solid fa-file-import me-2"></i>Import
           </label>
-          <input type="file" id="import" hidden />
+          <input
+            type="file"
+            id="import"
+            hidden
+            onChange={(e) => handleImport(e)}
+          />
 
-          <CSVLink
-            data={listUser}
+          {/** <CSVLink
+            data={dataExport}
             className="btn btn-success"
-            target="_blank"
             filename={"my-file.csv"}
+            asyncOnClick={true}
+            onClick={getUsersExport}
           >
             <i class="fa-solid fa-file-arrow-down me-2"></i>
             Export
-          </CSVLink>
+          </CSVLink> */}
+
+          <button className="btn btn-success" onClick={exportToExcel}>
+            <i className="fa-solid fa-file-arrow-down me-2"></i>
+            Export
+          </button>
         </div>
       </div>
       <div className="col-3 my-2">
