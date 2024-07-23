@@ -1,12 +1,14 @@
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ReactPaginate from "react-paginate";
+import _, { debounce } from "lodash";
+import { CSVLink, CSVDownload } from "react-csv";
 import ModalAddNewUser from "../Components/ModalAddNewUser";
+import { toast } from "react-toastify";
 import { getListUser, deleteUser } from "../Services/UserService";
 import { useEffect, useState } from "react";
 import ModalEditUser from "./ModalEditUser";
 import ModalDeleteCofirm from "./ModalDeleteCofirm";
-import { toast } from "react-toastify";
 
 const TableUser = () => {
   const [listUser, setListUser] = useState([]);
@@ -18,6 +20,9 @@ const TableUser = () => {
   const [showModalDeleteUserConfirm, setShowModalDeleteUserConfirm] =
     useState(false);
   const [dataUserDelete, setDataUserDelete] = useState({});
+  const [sortBy, setSortBy] = useState("asc");
+  const [sortField, setSortField] = useState("id");
+  const [seachEmail, setSeachEmail] = useState("");
 
   const ListUser = async (page) => {
     const res = await getListUser(page);
@@ -68,6 +73,28 @@ const TableUser = () => {
     }
   };
 
+  const handleSort = (sortBy, sortField) => {
+    setSortBy(sortBy);
+    setSortField(sortField);
+    let cloneListUser = _.cloneDeep(listUser);
+    cloneListUser = _.orderBy(cloneListUser, [sortField], [sortBy]);
+    setListUser(cloneListUser);
+  };
+
+  const handleSeachEmail = (e) => {
+    let keyword = e.target.value;
+    setSeachEmail(keyword);
+    if (keyword) {
+      let cloneListUser = _.cloneDeep(listUser);
+      cloneListUser = cloneListUser.filter((item) =>
+        item.email.includes(keyword)
+      );
+      setListUser(cloneListUser);
+    } else {
+      ListUser(1);
+    }
+  };
+
   useEffect(() => {
     ListUser(1);
   }, []);
@@ -76,17 +103,73 @@ const TableUser = () => {
     <>
       <div className="my-3 d-flex justify-content-between">
         <span className="fw-bold">List User:</span>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          Add New User
-        </button>
+        <div className="d-flex justify-content-between gap-3">
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowModal(true)}
+          >
+            <i class="fa-solid fa-circle-plus me-2"></i> Add New
+          </button>
+          <label htmlFor="import" className="btn btn-warning text-light">
+            <i class="fa-solid fa-file-import me-2"></i>Import
+          </label>
+          <input type="file" id="import" hidden />
+
+          <CSVLink
+            data={listUser}
+            className="btn btn-success"
+            target="_blank"
+            filename={"my-file.csv"}
+          >
+            <i class="fa-solid fa-file-arrow-down me-2"></i>
+            Export
+          </CSVLink>
+        </div>
+      </div>
+      <div className="col-3 my-2">
+        <input
+          className="form-control"
+          placeholder="Seach email user ..."
+          value={seachEmail}
+          onChange={(e) => handleSeachEmail(e)}
+        />
       </div>
       <div className="table-user">
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>ID</th>
+              <th className="d-flex justify-content-between">
+                <span> ID </span>
+                <span>
+                  <i
+                    class="fa-solid fa-arrow-down mx-2"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleSort("desc", "id")}
+                  ></i>
+                  <i
+                    class="fa-solid fa-arrow-up"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleSort("asc", "id")}
+                  ></i>
+                </span>
+              </th>
               <th>Email</th>
-              <th>First Name</th>
+              <th className="d-flex justify-content-between">
+                <span> FirstName </span>
+                <span>
+                  <i
+                    class="fa-solid fa-arrow-down mx-2"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleSort("desc", "first_name")}
+                  ></i>
+                  <i
+                    class="fa-solid fa-arrow-up"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleSort("asc", "first_name")}
+                  ></i>
+                </span>
+              </th>
+
               <th>Last Name</th>
               <th>Action</th>
             </tr>
