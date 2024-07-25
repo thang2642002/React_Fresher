@@ -32,7 +32,8 @@ const Header = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           {((user && user.auth === true) ||
-            window.location.pathname === "/") && (
+            window.location.pathname === "/" ||
+            window.location.pathname === "/users") && (
             <Fragment>
               <Nav className="me-auto">
                 <NavLink to="/" className="nav-link">

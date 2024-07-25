@@ -21,7 +21,7 @@ const Login = () => {
       return;
     } else {
       setShowLoading(true);
-      let res = await loginApi(email, password);
+      let res = await loginApi(email.trim(), password);
 
       if (res && res.token) {
         loginContext(email, res.token);
@@ -39,12 +39,12 @@ const Login = () => {
     navigate("/");
   };
 
-  // useEffect(() => {
-  //   let token = localStorage.getItem("token");
-  //   if (token) {
-  //     navigate("/");
-  //   }
-  // }, []);
+  const handlePressEnter = (e) => {
+    if (e && e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="login-container col-12 col-sm-4">
       <div className="title">Login</div>
@@ -61,6 +61,7 @@ const Login = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => handlePressEnter(e)}
         />
         <i
           class={

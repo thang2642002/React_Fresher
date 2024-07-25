@@ -1,6 +1,7 @@
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import ReactPaginate from "react-paginate";
+import "../App.scss";
 import _, { debounce } from "lodash";
 import { CSVLink, CSVDownload } from "react-csv";
 import * as XLSX from "xlsx";
@@ -12,10 +13,7 @@ import { useEffect, useState } from "react";
 import ModalEditUser from "./ModalEditUser";
 import ModalDeleteCofirm from "./ModalDeleteCofirm";
 
-
 const TableUser = () => {
-
-
   const [listUser, setListUser] = useState([]);
   const [totalUser, setTotalUser] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
@@ -107,23 +105,6 @@ const TableUser = () => {
     }
   };
 
-  // const getUsersExport = (event, done) => {
-  //   let result = [];
-  //   if (listUser && listUser.length > 0) {
-  //     result.push(["Id", "Email", "Frist Name", "Last Name"]);
-  //     listUser.map((item, index) => {
-  //       let arr = [];
-  //       arr[0] = item.id;
-  //       arr[1] = item.email;
-  //       arr[2] = item.first_name;
-  //       arr[3] = item.last_name;
-  //       result.push(arr);
-  //     });
-  //     setDataExport(result);
-  //     done();
-  //   }
-  // };
-
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       listUser.map((user) => {
@@ -138,26 +119,6 @@ const TableUser = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Users");
     XLSX.writeFile(wb, "UsersData.xlsx");
   };
-
-  // const handleImport = (e) => {
-  //   if (e.target && e.target.files && e.target.files[0]) {
-  //     let file = e.target.files[0];
-  //     if (
-  //       file.type !==
-  //         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-  //       file.type !== "text/csv"
-  //     ) {
-  //       toast.error("file format error");
-  //     } else {
-  //       Papa.parse(file, {
-  //         header: true,
-  //         complete: function (results) {
-  //           console.log("Finished:", results.data);
-  //         },
-  //       });
-  //     }
-  //   }
-  // };
 
   const handleImport = (e) => {
     if (e.target && e.target.files && e.target.files[0]) {
@@ -208,8 +169,8 @@ const TableUser = () => {
 
   return (
     <>
-      <div className="my-3 d-flex justify-content-between">
-        <span className="fw-bold">List User:</span>
+      <div className="my-3 d-sm-flex justify-content-between">
+        <span className="fw-bold col-12">List User:</span>
         <div className="d-flex justify-content-between gap-3">
           <button
             className="btn btn-primary"
@@ -227,24 +188,13 @@ const TableUser = () => {
             onChange={(e) => handleImport(e)}
           />
 
-          {/** <CSVLink
-            data={dataExport}
-            className="btn btn-success"
-            filename={"my-file.csv"}
-            asyncOnClick={true}
-            onClick={getUsersExport}
-          >
-            <i class="fa-solid fa-file-arrow-down me-2"></i>
-            Export
-          </CSVLink> */}
-
           <button className="btn btn-success" onClick={exportToExcel}>
             <i className="fa-solid fa-file-arrow-down me-2"></i>
             Export
           </button>
         </div>
       </div>
-      <div className="col-3 my-2">
+      <div className="col-12 col-sm-4 my-2">
         <input
           className="form-control"
           placeholder="Seach email user ..."
