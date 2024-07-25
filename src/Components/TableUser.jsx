@@ -12,7 +12,10 @@ import { useEffect, useState } from "react";
 import ModalEditUser from "./ModalEditUser";
 import ModalDeleteCofirm from "./ModalDeleteCofirm";
 
+
 const TableUser = () => {
+
+
   const [listUser, setListUser] = useState([]);
   const [totalUser, setTotalUser] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
@@ -212,10 +215,10 @@ const TableUser = () => {
             className="btn btn-primary"
             onClick={() => setShowModal(true)}
           >
-            <i class="fa-solid fa-circle-plus me-2"></i> Add New
+            <i className="fa-solid fa-circle-plus me-2"></i> Add New
           </button>
           <label htmlFor="import" className="btn btn-warning text-light">
-            <i class="fa-solid fa-file-import me-2"></i>Import
+            <i className="fa-solid fa-file-import me-2"></i>Import
           </label>
           <input
             type="file"
@@ -257,12 +260,12 @@ const TableUser = () => {
                 <span> ID </span>
                 <span>
                   <i
-                    class="fa-solid fa-arrow-down mx-2"
+                    className="fa-solid fa-arrow-down mx-2"
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("desc", "id")}
                   ></i>
                   <i
-                    class="fa-solid fa-arrow-up"
+                    className="fa-solid fa-arrow-up"
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("asc", "id")}
                   ></i>
@@ -273,12 +276,12 @@ const TableUser = () => {
                 <span> FirstName </span>
                 <span>
                   <i
-                    class="fa-solid fa-arrow-down mx-2"
+                    className="fa-solid fa-arrow-down mx-2"
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("desc", "first_name")}
                   ></i>
                   <i
-                    class="fa-solid fa-arrow-up"
+                    className="fa-solid fa-arrow-up"
                     style={{ cursor: "pointer" }}
                     onClick={() => handleSort("asc", "first_name")}
                   ></i>
